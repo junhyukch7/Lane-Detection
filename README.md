@@ -1,7 +1,5 @@
-# Lane-Detection
-## opencv 기반 직선차선인식 알고리즘
-
-![solidyellow](https://user-images.githubusercontent.com/79674592/117899866-02e88a00-b303-11eb-9714-3bbcc257f100.gif)
+# Lane-Detection opencv 기반 직선차선인식 알고리즘
+<img src = "https://github.com/junhyukch7/Lane-Detection/blob/main/test%20image/Lane_detection%201.PNG" width="50%">
 
 ### Pipeline
 
@@ -28,3 +26,30 @@
 6. hough transform
 
 #### Step 2 : 대표선 찾기
+
+아이디어 : 중앙값과 비교하여 중앙값의 가까운 값들의 평균이 대표선
+
+1. seperate_line()
+* 선의 기울기를 기준으로 왼쪽차선과 오른쪽 차선을 구분한다.
+* 이때 수평의 성분과 수직의 성분은 제외한다.
+
+2. get slope mean()
+* 각각의 차선의 기울기의 중앙값을 구한 후 hough transfrom으로 얻어진 직선과 비교하여 오차가 작은 기울기의 집합을 모은다.
+* 모아진 직선의 평균이 기울기 값이 이상적인 기울기 값
+
+3. get intercept coord()
+* 기울기 구할 때와 마찬가지로 x좌표의 중앙값을 구한 후 모든 x좌표와 비교하여 오차가 작은 좌표의 집합을 모은다.
+* 모아진 좌표의 평균이 이상적인 평균 좌표 위치
+
+#### Step 3 : 선 그리기
+* cv::line(), cv::fillPoly()함수를 이용하여 이상적인 차선과 영역을 그린다.
+* 이때 평균y좌표는 ROI사다리꼴의 높이 좌표와 같다
+---
+### Result video
+<img width="50%" src="https://github.com/junhyukch7/Lane-Detection/blob/main/test%20image/solidyellow.gif">
+
+<img width="50%" src="https://github.com/junhyukch7/Lane-Detection/blob/main/test%20image/challenge.gif">
+
+---
+### Conclusion
+* 결과 영상에서도 볼 수 있듯이 직선에서의 차선인식은 그림자나 차선의 경계가 희미해지는 영역에서도 잘 인식하는 것을 볼 수 있다. 하지만 곡선의 영역에서 인식이 정확하게 되지 않음을 확인 할 수 있었다. 이와 같은 곡선영역에서의 차선검출을 위해 persepective를 top view로 바꾸어 차선을 인식하는 방법을 이용하는 것이 중요함을 알 수 있었다.
