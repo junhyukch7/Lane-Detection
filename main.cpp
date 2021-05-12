@@ -8,8 +8,6 @@ using namespace std;
 using namespace cv;
 
 Mat gray_scale(Mat& image) {
-	//--------------GRAYSCALE IMAGE-----------------
-	// Define grayscale image
 	Mat gray;
 
 	// color to gray
@@ -21,8 +19,7 @@ Mat gray_scale(Mat& image) {
 
 }
 Mat Gaussian_blurring(Mat& gray) {
-	int kSize = 9; // Guassian kenrnel size bigger kernel = more smoothing
-	// Define smoothed image
+	int kSize = 9; 
 	Mat blur;
 	GaussianBlur(gray, blur, Size(kSize, kSize), 0, 0);
 
@@ -43,10 +40,10 @@ Mat canny_edge(Mat& blur) {
 	return edge;
 }
 Mat Roi(Mat& image, Mat& edge) {
-	// roi¸¦ ¸¸µé±â À§ÇØ ¸ÕÀú mask Çà·Ä ¸¸µé±â
+	// roië¥¼ ë§Œë“¤ê¸° ìœ„í•´ ë¨¼ì € mask í–‰ë ¬ ë§Œë“¤ê¸°
 	Mat mask = Mat::zeros(image.rows, image.cols, CV_8UC1); // CV_8UC3 to make it a 3 channel
 
-	// mask¸¦ ¸¸µé »ç´Ù¸®²ÃÀÇ Á¡ ¹è¿­
+	// maskë¥¼ ë§Œë“¤ ì‚¬ë‹¤ë¦¬ê¼´ì˜ ì  ë°°ì—´
 	Point mask_points[1][4];
 	
 	mask_points[0][0] = Point(50, image.size().height);
@@ -54,8 +51,8 @@ Mat Roi(Mat& image, Mat& edge) {
 	mask_points[0][2] = Point(image.size().width / 2 + 45, image.size().height / 2 + 60);
 	mask_points[0][3] = Point(image.size().width - 50, image.size().height);
 
-	const Point* ppt[1] = { mask_points[0] }; // mask_pointÀÇ ÁÖ¼Ò°ªÀ» Àü´ŞÇØ¾ß ÇÔ
-	int npt[] = { 4 }; // »ç´Ù¸®²Ã ²ÀÁşÁ¡ÀÇ °³¼ö
+	const Point* ppt[1] = { mask_points[0] }; // mask_pointì˜ ì£¼ì†Œê°’ì„ ì „ë‹¬í•´ì•¼ í•¨
+	int npt[] = { 4 }; // ì‚¬ë‹¤ë¦¬ê¼´ ê¼­ì§“ì ì˜ ê°œìˆ˜
 	fillPoly(mask, ppt, npt, 1, Scalar(255,255,255), 8);
 
 	imshow("Mask", mask);
@@ -63,7 +60,7 @@ Mat Roi(Mat& image, Mat& edge) {
 
 	
 	Mat roi = edge.clone();
-	bitwise_and(edge, mask, roi); // maskµÈ ¿µ¿ª¸¸ ÃßÃâ
+	bitwise_and(edge, mask, roi); // maskëœ ì˜ì—­ë§Œ ì¶”ì¶œ
 
 	imshow("ROI", roi);
 	waitKey(0);
@@ -80,7 +77,7 @@ vector<Vec4i> hough_transform(Mat& image, Mat& roi) {
 	vector<Vec4i> lines; 
 	HoughLinesP(roi, lines, rho, theta, threshold, minLineLength, maxLineGap);
 
-	Mat allLinesIm = Mat::zeros(image.rows, image.cols, CV_8UC3); // ¶óÀÎ »ö¶§¹®¿¡ Â÷¿øÀÌ 3°³°¡ ÇÊ¿ä
+	Mat allLinesIm = Mat::zeros(image.rows, image.cols, CV_8UC3); // ë¼ì¸ ìƒ‰ë•Œë¬¸ì— ì°¨ì›ì´ 3ê°œê°€ í•„ìš”
 
 	for (Vec4i l : lines) {
 		line(allLinesIm, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, 8);
@@ -91,27 +88,27 @@ vector<Vec4i> hough_transform(Mat& image, Mat& roi) {
 }
 double median(vector<double> vec) {
 
-	// º¤ÅÍÀ¸ ¤Ó±æÀÌ
+	// ë²¡í„°ê¸¸ì´
 	int vecSize = vec.size();
 
-	// ¿¡·¯ Ã³¸®
+	// ì—ëŸ¬ ì²˜ë¦¬
 	if (vecSize == 0) {
 		throw domain_error("median of empty vector");
 	}
 
-	// ¿¬»êÈ½¼ö¸¦ ÁÙÀÌ±â À§ÇØ Á¤·Ä
+	// ì—°ì‚°íšŸìˆ˜ë¥¼ ì¤„ì´ê¸° ìœ„í•´ ì •ë ¬
 	sort(vec.begin(), vec.end());
 
 	int middle;
 	double median;
 
-	// º¤ÅÍÀÇ ±æÀÌ°¡ Â¦¼öÀÎ °æ¿ì Áß¾Ó°ª Á¸Àç X, °¡¿îµ¥ µÎ°³ÀÇ °ªÀÇ Æò±ÕÀ» ÃëÇÔ
+	// ë²¡í„°ì˜ ê¸¸ì´ê°€ ì§ìˆ˜ì¸ ê²½ìš° ì¤‘ì•™ê°’ ì¡´ì¬ X, ê°€ìš´ë° ë‘ê°œì˜ ê°’ì˜ í‰ê· ì„ ì·¨í•¨
 	if (vecSize % 2 == 0) {
 		middle = vecSize / 2;
 		median = (vec[middle - 1] + vec[middle]) / 2;
 	}
 
-	// È¦¼öÀÎ °æ¿ì´Â Áß¾Ó°ªÀÌ Á¸ÀçÇÏ¹Ç·Î Áß¾ÓÀÇ À§Ä¡ÇÑ °ªÀÌ Áß¾Ó°ªÀÓ
+	// í™€ìˆ˜ì¸ ê²½ìš°ëŠ” ì¤‘ì•™ê°’ì´ ì¡´ì¬í•˜ë¯€ë¡œ ì¤‘ì•™ì˜ ìœ„ì¹˜í•œ ê°’ì´ ì¤‘ì•™ê°’ì„
 	else {
 		middle = vecSize / 2;
 		median = vec[middle];
@@ -119,53 +116,53 @@ double median(vector<double> vec) {
 	return median;
 }
 void seperate_line(vector<Vec4i> lines, vector<vector<double>>& slopePositiveLines, vector<vector<double>>& slopeNegativeLines) {
-	// ÇàÀ» Ãß°¡ÇÏ±â À§ÇÑ cnt
+	// í–‰ì„ ì¶”ê°€í•˜ê¸° ìœ„í•œ cnt
 	int negCounter = 0;
 	int posCounter = 0;
 
-	// ¸ğµç ¶óÀÎµé¿¡ ´ëÇØ ±â¿ï±â¸¦ °Ë»çÇÏ¿© ¾ç¼ö À½¼ö ³ª´©±â
+	// ëª¨ë“  ë¼ì¸ë“¤ì— ëŒ€í•´ ê¸°ìš¸ê¸°ë¥¼ ê²€ì‚¬í•˜ì—¬ ì–‘ìˆ˜ ìŒìˆ˜ ë‚˜ëˆ„ê¸°
 	for (size_t i = 0; i != lines.size(); ++i) {
 
-		// ÇöÀç ¶óÀÎ ÁÂÇ¥ Á¤º¸
+		// í˜„ì¬ ë¼ì¸ ì¢Œí‘œ ì •ë³´
 		double x1 = lines[i][0];
 		double y1 = lines[i][1];
 		double x2 = lines[i][2];
 		double y2 = lines[i][3];
 
-		// Á¡°ú Á¡»çÀÌÀÇ °Å¸® °ø½Ä Àû¿ëÇÏ¿© Á÷¼±ÀÇ ±æÀÌ ±¸ÇÏ±â
+		// ì ê³¼ ì ì‚¬ì´ì˜ ê±°ë¦¬ ê³µì‹ ì ìš©í•˜ì—¬ ì§ì„ ì˜ ê¸¸ì´ êµ¬í•˜ê¸°
 		double lineLength = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 
-		// ¶óÀÎÀÇ ±æÀÌ°¡ roi »ç´Ù¸®²ÃÀÇ ºøº¯ÀÇ ±æÀÌ Á¤µµ´Â µÇ¾ßÇÔ
+		// ë¼ì¸ì˜ ê¸¸ì´ê°€ roi ì‚¬ë‹¤ë¦¬ê¼´ì˜ ë¹—ë³€ì˜ ê¸¸ì´ ì •ë„ëŠ” ë˜ì•¼í•¨
 		if (lineLength > 30) {
 
-			// °ªÀÌ ¹«ÇÑ´ë·Î ¹ß»êÇÏ´Â °ÍÀ» ¹æÁö
+			// ê°’ì´ ë¬´í•œëŒ€ë¡œ ë°œì‚°í•˜ëŠ” ê²ƒì„ ë°©ì§€
 			if (x2 != x1) {
 
-				// ±â¿ï±â °ø½Ä
+				// ê¸°ìš¸ê¸° ê³µì‹
 				double slope = (y2 - y1) / (x2 - x1);
 
-				// ±â¿ï±â°¡ ¾çÀÌ¶ó¸é?? == ¿ŞÂÊ Â÷¼±
+				// ê¸°ìš¸ê¸°ê°€ ì–‘ì´ë¼ë©´?? == ì™¼ìª½ ì°¨ì„ 
 				if (slope > 0) {
 
-					// xÃà°ú ¶óÀÎÀÌ ÀÌ·ç´Â °¢µµ Ã£±â ÀÌ °¢µµ¸¦ ±âÁØÀ¸·Î ¶óÀÎÀÇ ÀûÇÕ¼º Æò°¡
-					double tanTheta = tan((abs(y2 - y1)) / (abs(x2 - x1))); // tan(theta)  = ³ôÀÌ / ¹Øº¯
+					// xì¶•ê³¼ ë¼ì¸ì´ ì´ë£¨ëŠ” ê°ë„ ì°¾ê¸° ì´ ê°ë„ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë¼ì¸ì˜ ì í•©ì„± í‰ê°€
+					double tanTheta = tan((abs(y2 - y1)) / (abs(x2 - x1))); // tan(theta)  = ë†’ì´ / ë°‘ë³€
 					double angle = atan(tanTheta) * 180 / CV_PI;
 
-					// roi°¡ »ç´Ù¸®²ÃÀÌ±â ¶§¹®¿¡ LaneÀÇ xÃà°úÀÇ °¢µµ´Â 90µµ È¤Àº 0µµ°¡ µÉ ¼ö ¾ø´Ù.
-					// ¼öÁ÷ ¼öÆò ¶óÀÎ ¼ººĞ Á¦°Å
+					// roiê°€ ì‚¬ë‹¤ë¦¬ê¼´ì´ê¸° ë•Œë¬¸ì— Laneì˜ xì¶•ê³¼ì˜ ê°ë„ëŠ” 90ë„ í˜¹ì€ 0ë„ê°€ ë  ìˆ˜ ì—†ë‹¤.
+					// ìˆ˜ì§ ìˆ˜í‰ ë¼ì¸ ì„±ë¶„ ì œê±°
 					if (abs(angle) < 85 && abs(angle) > 20) {
 
-						// Çà·ÄÀÇ ÇüÅÂ·Î ¹Ù²Ù±â -> Çà ¼ººĞ(¶óÀÎ ³Ñ¹ö) Ãß°¡
+						// í–‰ë ¬ì˜ í˜•íƒœë¡œ ë°”ê¾¸ê¸° -> í–‰ ì„±ë¶„(ë¼ì¸ ë„˜ë²„) ì¶”ê°€
 						slopeNegativeLines.resize(negCounter + 1);
 
-						// [x1, y1, x2, y2, slope] ->¿­ Ãß°¡
+						// [x1, y1, x2, y2, slope] ->ì—´ ì¶”ê°€
 						slopeNegativeLines[negCounter].resize(5);
 
 						slopeNegativeLines[negCounter][0] = x1;
 						slopeNegativeLines[negCounter][1] = y1;
 						slopeNegativeLines[negCounter][2] = x2;
 						slopeNegativeLines[negCounter][3] = y2;
-						slopeNegativeLines[negCounter][4] = -slope; // ¾çÀÇ ±â¿ï±âÀÌ±â ¶§¹®¿¡ - 
+						slopeNegativeLines[negCounter][4] = -slope; // ì–‘ì˜ ê¸°ìš¸ê¸°ì´ê¸° ë•Œë¬¸ì— - 
 
 						// counter ++
 						negCounter++;
@@ -173,23 +170,23 @@ void seperate_line(vector<Vec4i> lines, vector<vector<double>>& slopePositiveLin
 
 				}
 
-				// ±â¿ï±â°¡ À½ÀÎ°æ¿ì == ¿À¸¥ÂÊ Â÷¼±
+				// ê¸°ìš¸ê¸°ê°€ ìŒì¸ê²½ìš° == ì˜¤ë¥¸ìª½ ì°¨ì„ 
 				if (slope < 0) {
 
-					// xÃà°ú ¶óÀÎÀÌ ÀÌ·ç´Â °¢µµ Ã£±â ÀÌ °¢µµ¸¦ ±âÁØÀ¸·Î ¶óÀÎÀÇ ÀûÇÕ¼º Æò°¡
-					double tanTheta = tan((abs(y2 - y1)) / (abs(x2 - x1))); // tan(theta)  = ³ôÀÌ / ¹Øº¯
+					// xì¶•ê³¼ ë¼ì¸ì´ ì´ë£¨ëŠ” ê°ë„ ì°¾ê¸° ì´ ê°ë„ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë¼ì¸ì˜ ì í•©ì„± í‰ê°€
+					double tanTheta = tan((abs(y2 - y1)) / (abs(x2 - x1))); // tan(theta)  = ë†’ì´ / ë°‘ë³€
 					double angle = atan(tanTheta) * 180 / CV_PI;
 
-					// roi°¡ »ç´Ù¸®²ÃÀÌ±â ¶§¹®¿¡ LaneÀÇ xÃà°úÀÇ °¢µµ´Â 90µµ È¤Àº 0µµ°¡ µÉ ¼ö ¾ø´Ù.
-					// ¼öÁ÷ ¼öÆò ¶óÀÎ ¼ººĞ Á¦°Å
+					// roiê°€ ì‚¬ë‹¤ë¦¬ê¼´ì´ê¸° ë•Œë¬¸ì— Laneì˜ xì¶•ê³¼ì˜ ê°ë„ëŠ” 90ë„ í˜¹ì€ 0ë„ê°€ ë  ìˆ˜ ì—†ë‹¤.
+					// ìˆ˜ì§ ìˆ˜í‰ ë¼ì¸ ì„±ë¶„ ì œê±°
 					if (abs(angle) < 85 && abs(angle) > 20) {
-						// Çà·ÄÀÇ ÇüÅÂ·Î ¹Ù²Ù±â -> Çà ¼ººĞ(¶óÀÎ ³Ñ¹ö) Ãß°¡
+						// í–‰ë ¬ì˜ í˜•íƒœë¡œ ë°”ê¾¸ê¸° -> í–‰ ì„±ë¶„(ë¼ì¸ ë„˜ë²„) ì¶”ê°€
 						slopePositiveLines.resize(posCounter + 1);
 
-						// [x1, y1, x2, y2, slope] ->¿­ ¼ººĞ Á¶Á¤
+						// [x1, y1, x2, y2, slope] ->ì—´ ì„±ë¶„ ì¡°ì •
 						slopePositiveLines[posCounter].resize(5);
 
-						// Çà·Ä ¿ä¼Ò Ãß°¡
+						// í–‰ë ¬ ìš”ì†Œ ì¶”ê°€
 						slopePositiveLines[posCounter][0] = x1;
 						slopePositiveLines[posCounter][1] = y1;
 						slopePositiveLines[posCounter][2] = x2;
@@ -208,63 +205,63 @@ void seperate_line(vector<Vec4i> lines, vector<vector<double>>& slopePositiveLin
 vector<double> get_slope_mean(vector<vector<double>>& slopePositiveLines, vector<vector<double>>& slopeNegativeLines) {
 	vector<double> SlopeMean; // first = positve, second = negative
 	
-	// ¾çÀÇ ¶óÀÎÀÇ Æò±Õ°ªÀ» ±¸ÇÏ±â À§ÇØ ¾çÀÇ ±â¿ï±â °ªÀ» ¸ğµÎ ÀúÀå
+	// ì–‘ì˜ ë¼ì¸ì˜ í‰ê· ê°’ì„ êµ¬í•˜ê¸° ìœ„í•´ ì–‘ì˜ ê¸°ìš¸ê¸° ê°’ì„ ëª¨ë‘ ì €ì¥
 	vector<double> positiveSlopes;
 	for (unsigned int i = 0; i != slopePositiveLines.size(); ++i) {
 		positiveSlopes.push_back(slopePositiveLines[i][4]);
 	}
 
-	// ±â¿ï±âµéÀÇ Áß°£°ª °è»ê
-	sort(positiveSlopes.begin(), positiveSlopes.end()); // ÆíÇÏ°Ô Áß¾Ó°ª °è»êÀ» À§ÇØ Á¤·Ä
+	// ê¸°ìš¸ê¸°ë“¤ì˜ ì¤‘ê°„ê°’ ê³„ì‚°
+	sort(positiveSlopes.begin(), positiveSlopes.end()); // í¸í•˜ê²Œ ì¤‘ì•™ê°’ ê³„ì‚°ì„ ìœ„í•´ ì •ë ¬
 	double posSlopeMedian; // define positive slope median
 	posSlopeMedian = median(positiveSlopes);
 
 
-	// ÁÁÀº ±â¿ï±â¸¦ Ã£±â À§ÇØ ÇöÀç °ª°ú Áß¾Ó°ªÀÇ Â÷ÀÌ¸¦ È®ÀÎ ÇÑ ÈÄ Â÷ÀÌ°¡ ÀûÀ¸¸é ok!!
+	// ì¢‹ì€ ê¸°ìš¸ê¸°ë¥¼ ì°¾ê¸° ìœ„í•´ í˜„ì¬ ê°’ê³¼ ì¤‘ì•™ê°’ì˜ ì°¨ì´ë¥¼ í™•ì¸ í•œ í›„ ì°¨ì´ê°€ ì ìœ¼ë©´ ok!!
 	vector<double> posSlopesGood;
 	double posSum = 0.0; // sum so we'll be able to get mean
 
 	// Loop through positive slopes and add the good ones
 	for (size_t i = 0; i != positiveSlopes.size(); ++i) {
 
-		// ¸¸¾à ÇöÀç°ª°ú Áß¾Ó°ª°úÀÇ Â÷ÀÌ°¡ ÀÏÁ¤ ÀÓ°è°ªº¸´Ù Àû´Ù¸é ok! ÀÓ°è°ªÀº Å×½ºÆ®
+		// ë§Œì•½ í˜„ì¬ê°’ê³¼ ì¤‘ì•™ê°’ê³¼ì˜ ì°¨ì´ê°€ ì¼ì • ì„ê³„ê°’ë³´ë‹¤ ì ë‹¤ë©´ ok! ì„ê³„ê°’ì€ í…ŒìŠ¤íŠ¸
 		if (abs(positiveSlopes[i] - posSlopeMedian) < 0.9) { //posSlopeMedian*0.2
 			posSlopesGood.push_back(positiveSlopes[i]); // Add slope to posSlopesGood
 			posSum += positiveSlopes[i];
 		}
 	}
 
-	// ÃÖÁ¾ ¾çÀÇ Æò±Õ°ª °è»ê
+	// ìµœì¢… ì–‘ì˜ í‰ê· ê°’ ê³„ì‚°
 	double posSlopeMean = posSum / posSlopesGood.size();
 
 	////////////////////////////////////////////////////////////////////////
 
-	// À½ÀÇ ¶óÀÎÀÇ Æò±Õ°ªÀ» ±¸ÇÏ±â À§ÇØ À½ÀÇ ±â¿ï±â °ªÀ» ¸ğµÎ ÀúÀå
+	// ìŒì˜ ë¼ì¸ì˜ í‰ê· ê°’ì„ êµ¬í•˜ê¸° ìœ„í•´ ìŒì˜ ê¸°ìš¸ê¸° ê°’ì„ ëª¨ë‘ ì €ì¥
 	vector<double> negativeSlopes;
 	for (size_t i = 0; i != slopeNegativeLines.size(); ++i) {
 		negativeSlopes.push_back(slopeNegativeLines[i][4]);
 	}
 
-	// À½ÀÇ ±â¿ï±â Áß¾Ó°ª °è»ê
+	// ìŒì˜ ê¸°ìš¸ê¸° ì¤‘ì•™ê°’ ê³„ì‚°
 	sort(negativeSlopes.begin(), negativeSlopes.end()); // sort vec
 	double negSlopeMedian; // define negative slope median
 	negSlopeMedian = median(negativeSlopes);
 
-	// ÁÁÀº ±â¿ï±â¸¦ Ã£±â À§ÇØ ÇöÀç °ª°ú Áß¾Ó°ªÀÇ Â÷ÀÌ¸¦ È®ÀÎ ÇÑ ÈÄ Â÷ÀÌ°¡ ÀûÀ¸¸é ok!!
+	// ì¢‹ì€ ê¸°ìš¸ê¸°ë¥¼ ì°¾ê¸° ìœ„í•´ í˜„ì¬ ê°’ê³¼ ì¤‘ì•™ê°’ì˜ ì°¨ì´ë¥¼ í™•ì¸ í•œ í›„ ì°¨ì´ê°€ ì ìœ¼ë©´ ok!!
 	vector<double> negSlopesGood;
 	double negSum = 0.0; // sum so we'll be able to get mean
 
 	// Loop through positive slopes and add the good ones
 	for (size_t i = 0; i != negativeSlopes.size(); ++i) {
 
-		// ¸¸¾à ÇöÀç°ª°ú Áß¾Ó°ª°úÀÇ Â÷ÀÌ°¡ ÀÏÁ¤ ÀÓ°è°ªº¸´Ù Àû´Ù¸é ok!
+		// ë§Œì•½ í˜„ì¬ê°’ê³¼ ì¤‘ì•™ê°’ê³¼ì˜ ì°¨ì´ê°€ ì¼ì • ì„ê³„ê°’ë³´ë‹¤ ì ë‹¤ë©´ ok!
 		if (abs(negativeSlopes[i] - negSlopeMedian) < 0.9) { // < negSlopeMedian*0.2
 			negSlopesGood.push_back(negativeSlopes[i]); // Add slope to negSlopesGood
 			negSum += negativeSlopes[i]; // add to sum
 		}
 	}
 
-	// ÃÖÁ¾ À½ÀÇ Æò±Õ°ª °è»ê
+	// ìµœì¢… ìŒì˜ í‰ê· ê°’ ê³„ì‚°
 	double negSlopeMean = negSum / negSlopesGood.size();
 
 	SlopeMean.push_back(posSlopeMean);
@@ -277,87 +274,87 @@ vector<double> get_intercept_coord(Mat& image, vector<vector<double>>& slopePosi
 	vector<double> InterceptPos;
 	
 	// Positive Lines
-	vector<double> xInterceptPos; // ±³Á¡À» ¸ğµÎ ±¸ÇÔ
+	vector<double> xInterceptPos; // êµì ì„ ëª¨ë‘ êµ¬í•¨
 
-	// ±³Á¡ÁÂÇ¥ Ã£±â
+	// êµì ì¢Œí‘œ ì°¾ê¸°
 	for (size_t i = 0; i != slopePositiveLines.size(); ++i) {
 		double x1 = slopePositiveLines[i][0]; // x value
-		double y1 = image.rows - slopePositiveLines[i][1]; // yÃà ¹İÀü
+		double y1 = image.rows - slopePositiveLines[i][1]; // yì¶• ë°˜ì „
 		double slope = slopePositiveLines[i][4];
-		double yIntercept = y1 - slope * x1; // b = y-ax, yÀıÆí
-		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xÀıÆí
-		if (isnan(xIntercept) == 0) { // ¹ß»ê ¹æÁö
+		double yIntercept = y1 - slope * x1; // b = y-ax, yì ˆí¸
+		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xì ˆí¸
+		if (isnan(xIntercept) == 0) { // ë°œì‚° ë°©ì§€
 			xInterceptPos.push_back(xIntercept);
 		}
 	}
 
-	// xÁÂÇ¥µéÀÇ Áß¾Ó°ª °è»ê
+	// xì¢Œí‘œë“¤ì˜ ì¤‘ì•™ê°’ ê³„ì‚°
 	double xIntPosMed = median(xInterceptPos);
 
-	// ÁÁÀº °ªÀ» ÃßÃâÇÏ±â À§ÇØ Áß¾Ó°ª Á¤¸®¸¦ ÀÌ¿ëÇÑ xÁÂÇ¥¿Í Áß¾Ó°ª Á¤¸®¸¦ ÇÏÁö ¾ÊÀº xÁÂÇ¥µéÀ» ºñ±³
-	// Â÷ÀÌ°¡ ÀûÀ¸¸é ÁÁÀº °ª!!
+	// ì¢‹ì€ ê°’ì„ ì¶”ì¶œí•˜ê¸° ìœ„í•´ ì¤‘ì•™ê°’ ì •ë¦¬ë¥¼ ì´ìš©í•œ xì¢Œí‘œì™€ ì¤‘ì•™ê°’ ì •ë¦¬ë¥¼ í•˜ì§€ ì•Šì€ xì¢Œí‘œë“¤ì„ ë¹„êµ
+	// ì°¨ì´ê°€ ì ìœ¼ë©´ ì¢‹ì€ ê°’!!
 	vector<double> xIntPosGood;
 	double xIntSum = 0; 
 
-	// ºñ±³¸¦ À§ÇØ ·çÇÁ ÇÑ¹ø ´õ(¿©±â¼± Áß¾Ó°ª ¿¬»ê X)
+	// ë¹„êµë¥¼ ìœ„í•´ ë£¨í”„ í•œë²ˆ ë”(ì—¬ê¸°ì„  ì¤‘ì•™ê°’ ì—°ì‚° X)
 	for (size_t i = 0; i != slopePositiveLines.size(); ++i) {
 		double x1 = slopePositiveLines[i][0]; // x value
-		double y1 = image.rows - slopePositiveLines[i][1]; // yÃà ¹İÀüµÇ¾î ÀÖÀ½
+		double y1 = image.rows - slopePositiveLines[i][1]; // yì¶• ë°˜ì „ë˜ì–´ ìˆìŒ
 		double slope = slopePositiveLines[i][4];
-		double yIntercept = y1 - slope * x1; // b = y-ax, yÀıÆí
-		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xÀıÆí
+		double yIntercept = y1 - slope * x1; // b = y-ax, yì ˆí¸
+		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xì ˆí¸
 
-		// ¹ß»êÇÏÁöµµ ¾Ê°í Áß¾Ó°ª°ú Å©°Ô Â÷ÀÌ°¡ ³ªÁö ¾Ê´Â´Ù¸é Åë°ú
+		// ë°œì‚°í•˜ì§€ë„ ì•Šê³  ì¤‘ì•™ê°’ê³¼ í¬ê²Œ ì°¨ì´ê°€ ë‚˜ì§€ ì•ŠëŠ”ë‹¤ë©´ í†µê³¼
 		if (isnan(xIntercept) == 0 && abs(xIntercept - xIntPosMed) < 0.35*xIntPosMed) {
 			xIntPosGood.push_back(xIntercept); // add to 'good' vector
 			xIntSum += xIntercept;
 		}
 	}
 
-	// ¾çÀÇ ±â¿ï±âÀÇ xÁÂÇ¥ Æò±Õ°ª °è»ê
+	// ì–‘ì˜ ê¸°ìš¸ê¸°ì˜ xì¢Œí‘œ í‰ê· ê°’ ê³„ì‚°
 	double xInterceptPosMean = xIntSum / xIntPosGood.size();
 
 	/*---------------------------------------------------------------------*/
 
 	// Negative Lines
-	vector<double> xInterceptNeg; //±³Á¡À» ¸ğµÎ ±¸ÇÔ
+	vector<double> xInterceptNeg; //êµì ì„ ëª¨ë‘ êµ¬í•¨
 
-	// ±³Á¡ÁÂÇ¥ Ã£±â
+	// êµì ì¢Œí‘œ ì°¾ê¸°
 	for (size_t i = 0; i != slopeNegativeLines.size(); ++i) {
 		double x1 = slopeNegativeLines[i][0]; // x value
-		double y1 = image.rows - slopeNegativeLines[i][1]; // yÃà ¹İÀü
+		double y1 = image.rows - slopeNegativeLines[i][1]; // yì¶• ë°˜ì „
 		double slope = slopeNegativeLines[i][4];
-		double yIntercept = y1 - slope * x1; // b = y-ax, yÀıÆí
-		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xÀıÆí
-		if (isnan(xIntercept) == 0) { // ¹ß»ê ¹æÁö
+		double yIntercept = y1 - slope * x1; // b = y-ax, yì ˆí¸
+		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xì ˆí¸
+		if (isnan(xIntercept) == 0) { // ë°œì‚° ë°©ì§€
 			xInterceptNeg.push_back(xIntercept); 
 		}
 	}
 
-	// xÁÂÇ¥µéÀÇ Áß¾Ó°ª °è»ê
+	// xì¢Œí‘œë“¤ì˜ ì¤‘ì•™ê°’ ê³„ì‚°
 	double xIntNegMed = median(xInterceptNeg);
 
-	// ÁÁÀº °ªÀ» ÃßÃâÇÏ±â À§ÇØ Áß¾Ó°ª Á¤¸®¸¦ ÀÌ¿ëÇÑ xÁÂÇ¥¿Í Áß¾Ó°ª Á¤¸®¸¦ ÇÏÁö ¾ÊÀº xÁÂÇ¥µéÀ» ºñ±³
-	// Â÷ÀÌ°¡ ÀûÀ¸¸é ÁÁÀº °ª!!
+	// ì¢‹ì€ ê°’ì„ ì¶”ì¶œí•˜ê¸° ìœ„í•´ ì¤‘ì•™ê°’ ì •ë¦¬ë¥¼ ì´ìš©í•œ xì¢Œí‘œì™€ ì¤‘ì•™ê°’ ì •ë¦¬ë¥¼ í•˜ì§€ ì•Šì€ xì¢Œí‘œë“¤ì„ ë¹„êµ
+	// ì°¨ì´ê°€ ì ìœ¼ë©´ ì¢‹ì€ ê°’!!
 	vector<double> xIntNegGood;
 	double xIntSumNeg = 0; 
 
-	// ºñ±³¸¦ À§ÇØ ·çÇÁ ÇÑ¹ø ´õ(¿©±â¼± Áß¾Ó°ª ¿¬»ê X)
+	// ë¹„êµë¥¼ ìœ„í•´ ë£¨í”„ í•œë²ˆ ë”(ì—¬ê¸°ì„  ì¤‘ì•™ê°’ ì—°ì‚° X)
 	for (size_t i = 0; i != slopeNegativeLines.size(); ++i) {
 		double x1 = slopeNegativeLines[i][0]; // x value
-		double y1 = image.rows - slopeNegativeLines[i][1]; // yÃà¹İÀü
+		double y1 = image.rows - slopeNegativeLines[i][1]; // yì¶•ë°˜ì „
 		double slope = slopeNegativeLines[i][4];
-		double yIntercept = y1 - slope * x1; // b = y-ax, yÀıÆí
-		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xÀıÆí
+		double yIntercept = y1 - slope * x1; // b = y-ax, yì ˆí¸
+		double xIntercept = -yIntercept / slope; // y=ax+b=0, x = -b/a , xì ˆí¸
 
-		// ¹ß»êÇÏÁöµµ ¾Ê°í Áß¾Ó°ª°ú Å©°Ô Â÷ÀÌ°¡ ³ªÁö ¾Ê´Â´Ù¸é Åë°ú
+		// ë°œì‚°í•˜ì§€ë„ ì•Šê³  ì¤‘ì•™ê°’ê³¼ í¬ê²Œ ì°¨ì´ê°€ ë‚˜ì§€ ì•ŠëŠ”ë‹¤ë©´ í†µê³¼
 		if (isnan(xIntercept) == 0 && abs(xIntercept - xIntNegMed) < .35*xIntNegMed) {
 			xIntNegGood.push_back(xIntercept); 
 			xIntSumNeg += xIntercept;
 		}
 	}
 
-	// À½ÀÇ ±â¿ï±âÀÇ xÁÂÇ¥ Æò±Õ°ª °è»ê
+	// ìŒì˜ ê¸°ìš¸ê¸°ì˜ xì¢Œí‘œ í‰ê· ê°’ ê³„ì‚°
 	double xInterceptNegMean = xIntSumNeg / xIntNegGood.size();
 	InterceptPos.push_back(xInterceptPosMean);
 	InterceptPos.push_back(xInterceptNegMean);
@@ -373,7 +370,7 @@ Mat drawing_lane(Mat& image, double posSlopeMean, double xInterceptPosMean, doub
 	double slope = posSlopeMean;
 	double x1 = xInterceptPosMean;
 	int y1 = 0;
-	double y2 = image.size().height - (image.size().height - image.size().height*0.35); // ROI»ç´Ù¸®²Ã ³ôÀÌ
+	double y2 = image.size().height - (image.size().height - image.size().height*0.35); // ROIì‚¬ë‹¤ë¦¬ê¼´ ë†’ì´
 	double x2 = (y2 - y1) / slope + x1;
 
 	// Add positive slope line to image
@@ -437,15 +434,15 @@ void fillter_colors(Mat image, Mat& img_filtered) {
 	Mat white_mask, white_image;
 	Mat yellow_mask, yellow_image;
 
-	//Â÷¼± »ö±ò ¹üÀ§ 
-	Scalar lower_white = Scalar(200, 200, 200); //Èò»ö Â÷¼± (RGB)
+	//ì°¨ì„  ìƒ‰ê¹” ë²”ìœ„ 
+	Scalar lower_white = Scalar(200, 200, 200); //í°ìƒ‰ ì°¨ì„  (RGB)
 	Scalar upper_white = Scalar(255, 255, 255);
-	Scalar lower_yellow = Scalar(10, 100, 100); //³ë¶õ»ö Â÷¼± (HSV)
+	Scalar lower_yellow = Scalar(10, 100, 100); //ë…¸ë€ìƒ‰ ì°¨ì„  (HSV)
 	Scalar upper_yellow = Scalar(40, 255, 255);
 
 	//Filter white pixels
-	inRange(img_bgr, lower_white, upper_white, white_mask); // Èò»ö ¹üÀ§°ª
-	bitwise_and(img_bgr, img_bgr, white_image, white_mask); // input ÀÌ¹ÌÁö³»¿¡ ÇØ´ç °æ°è°ª ³»¿¡ ÀÖ´Â °ª¸¸ ÃßÃâ
+	inRange(img_bgr, lower_white, upper_white, white_mask); // í°ìƒ‰ ë²”ìœ„ê°’
+	bitwise_and(img_bgr, img_bgr, white_image, white_mask); // input ì´ë¯¸ì§€ë‚´ì— í•´ë‹¹ ê²½ê³„ê°’ ë‚´ì— ìˆëŠ” ê°’ë§Œ ì¶”ì¶œ
 
 	cvtColor(img_bgr, img_hsv, COLOR_BGR2HSV);
 
@@ -475,7 +472,7 @@ int main() {
 	waitKey(0); 
 
 	//Mat img_filtered;
-	//fillter_colors(image, img_filtered); // ¼± ±¸ºĞÇÏ±â Èûµç °æ¿ì HSV·Î º¯È¯ÇÏÀÚ
+	//fillter_colors(image, img_filtered); // ì„  êµ¬ë¶„í•˜ê¸° í˜ë“  ê²½ìš° HSVë¡œ ë³€í™˜í•˜ì
 	
 	Mat gray = gray_scale(image); // gray scale
 	Mat blur = Gaussian_blurring(gray); // gaussian filtering
@@ -484,26 +481,26 @@ int main() {
 	vector<Vec4i> lines = hough_transform(image, roi); // hoguh transform
 	
 	
-	// ÀÌ¶§ ±×¾îÁø ¿©·¯ ¶óÀÎ Áß¿¡ ÃÖÀûÈ­µÈ ¶óÀÎÀ» ¼±ÅÃÇÏ±â À§ÇØ 
-	// ¶óÀÎµéÀÇ Áß¾Ó°ªÀÌ ÃÖÀûÀÇ ÇØ¶ó°í °¡Á¤ÇÏ°í Áß¾Ó ¶óÀÎÀÇ ÁÂÇ¥¸¦ ±¸ÇÏÀÚ!!
-	// ±¸ÇØ¾ß ÇÒ °Í : x,yÁÂÇ¥ Áß¾Ó°ª ±â¿ï±â Áß¾Ó°ª
+	// ì´ë•Œ ê·¸ì–´ì§„ ì—¬ëŸ¬ ë¼ì¸ ì¤‘ì— ìµœì í™”ëœ ë¼ì¸ì„ ì„ íƒí•˜ê¸° ìœ„í•´ 
+	// ë¼ì¸ë“¤ì˜ ì¤‘ì•™ê°’ì´ ìµœì ì˜ í•´ë¼ê³  ê°€ì •í•˜ê³  ì¤‘ì•™ ë¼ì¸ì˜ ì¢Œí‘œë¥¼ êµ¬í•˜ì!!
+	// êµ¬í•´ì•¼ í•  ê²ƒ : x,yì¢Œí‘œ ì¤‘ì•™ê°’ ê¸°ìš¸ê¸° ì¤‘ì•™ê°’
 
-	// ÁÂÃø ¶óÀÎ°ú ¿ìÃø ¶óÀÎÀ» ³ª´©±â À§ÇØ ±â¿ï±â¸¦ ±âÁØÀ¸·Î ³ª´«´Ù.
+	// ì¢Œì¸¡ ë¼ì¸ê³¼ ìš°ì¸¡ ë¼ì¸ì„ ë‚˜ëˆ„ê¸° ìœ„í•´ ê¸°ìš¸ê¸°ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë‚˜ëˆˆë‹¤.
 	vector< vector<double> > slopePositiveLines; // [x1 y1 x2 y2 slope]
 	vector< vector<double> > slopeNegativeLines; // [x1 y1 x2 y2 slope]
 	seperate_line(lines, slopePositiveLines, slopeNegativeLines);
 
-	// ³ª´©¾îÁø º¤ÅÍµéÀÇ ±â¿ï±â Áß¾Ó°ªÀ» ±¸ÇÑ´Ù.
+	// ë‚˜ëˆ„ì–´ì§„ ë²¡í„°ë“¤ì˜ ê¸°ìš¸ê¸° ì¤‘ì•™ê°’ì„ êµ¬í•œë‹¤.
 	vector<double> SlopeMean = get_slope_mean(slopePositiveLines, slopeNegativeLines); 
 	double posSlopeMean = SlopeMean[0]; // first = positive
 	double negSlopeMean = SlopeMean[1]; // second = negative
 
-	// ³ª´©¾îÁø º¤ÅÍµéÀÇ ÁÂÇ¥ Áß¾Ó°ª ±¸ÇÏ±â
+	// ë‚˜ëˆ„ì–´ì§„ ë²¡í„°ë“¤ì˜ ì¢Œí‘œ ì¤‘ì•™ê°’ êµ¬í•˜ê¸°
 	vector<double> InterceptPos = get_intercept_coord(image, slopePositiveLines, slopeNegativeLines);
 	double xInterceptPosMean = InterceptPos[0]; // first = positive
 	double xInterceptNegMean = InterceptPos[1]; // second = negative
 
-	// Æò±Õ y±³Á¡ ÁÂÇ¥°¡ ¾ø´Â ÀÌÀ¯´Â roi»ç´Ù¸®²ÃÀÇ ³ôÀÌ°¡ °ğ yÁÂÇ¥ÀÌ±â ¶§¹®
+	// í‰ê·  yêµì  ì¢Œí‘œê°€ ì—†ëŠ” ì´ìœ ëŠ” roiì‚¬ë‹¤ë¦¬ê¼´ì˜ ë†’ì´ê°€ ê³§ yì¢Œí‘œì´ê¸° ë•Œë¬¸
 	drawing_lane(image, posSlopeMean, xInterceptPosMean, negSlopeMean, xInterceptNegMean);
 	
 	/*
@@ -536,7 +533,7 @@ int main() {
 			break;
 		}
 		Mat img_filtered;
-		fillter_colors(image, img_filtered); // ¼± ±¸ºĞÇÏ±â Èûµç °æ¿ì HSV·Î º¯È¯ÇÏÀÚ
+		fillter_colors(image, img_filtered); // ì„  êµ¬ë¶„í•˜ê¸° í˜ë“  ê²½ìš° HSVë¡œ ë³€í™˜í•˜ì
 
 		Mat gray = gray_scale(img_filtered); // gray scale
 		Mat blur = Gaussian_blurring(gray); // gaussian filtering
@@ -545,26 +542,26 @@ int main() {
 		vector<Vec4i> lines = hough_transform(image, roi); // hoguh transform
 
 
-		// ÀÌ¶§ ±×¾îÁø ¿©·¯ ¶óÀÎ Áß¿¡ ÃÖÀûÈ­µÈ ¶óÀÎÀ» ¼±ÅÃÇÏ±â À§ÇØ 
-		// ¶óÀÎµéÀÇ Áß¾Ó°ªÀÌ ÃÖÀûÀÇ ÇØ¶ó°í °¡Á¤ÇÏ°í Áß¾Ó ¶óÀÎÀÇ ÁÂÇ¥¸¦ ±¸ÇÏÀÚ!!
-		// ±¸ÇØ¾ß ÇÒ °Í : x,yÁÂÇ¥ Áß¾Ó°ª ±â¿ï±â Áß¾Ó°ª
+		// ì´ë•Œ ê·¸ì–´ì§„ ì—¬ëŸ¬ ë¼ì¸ ì¤‘ì— ìµœì í™”ëœ ë¼ì¸ì„ ì„ íƒí•˜ê¸° ìœ„í•´ 
+		// ë¼ì¸ë“¤ì˜ ì¤‘ì•™ê°’ì´ ìµœì ì˜ í•´ë¼ê³  ê°€ì •í•˜ê³  ì¤‘ì•™ ë¼ì¸ì˜ ì¢Œí‘œë¥¼ êµ¬í•˜ì!!
+		// êµ¬í•´ì•¼ í•  ê²ƒ : x,yì¢Œí‘œ ì¤‘ì•™ê°’ ê¸°ìš¸ê¸° ì¤‘ì•™ê°’
 
-		// ÁÂÃø ¶óÀÎ°ú ¿ìÃø ¶óÀÎÀ» ³ª´©±â À§ÇØ ±â¿ï±â¸¦ ±âÁØÀ¸·Î ³ª´«´Ù.
+		// ì¢Œì¸¡ ë¼ì¸ê³¼ ìš°ì¸¡ ë¼ì¸ì„ ë‚˜ëˆ„ê¸° ìœ„í•´ ê¸°ìš¸ê¸°ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë‚˜ëˆˆë‹¤.
 		vector< vector<double> > slopePositiveLines; // [x1 y1 x2 y2 slope]
 		vector< vector<double> > slopeNegativeLines; // [x1 y1 x2 y2 slope]
 		seperate_line(lines, slopePositiveLines, slopeNegativeLines);
 
-		// ³ª´©¾îÁø º¤ÅÍµéÀÇ ±â¿ï±â Áß¾Ó°ªÀ» ±¸ÇÑ´Ù.
+		// ë‚˜ëˆ„ì–´ì§„ ë²¡í„°ë“¤ì˜ ê¸°ìš¸ê¸° ì¤‘ì•™ê°’ì„ êµ¬í•œë‹¤.
 		vector<double> SlopeMean = get_slope_mean(slopePositiveLines, slopeNegativeLines);
 		double posSlopeMean = SlopeMean[0]; // first = positive
 		double negSlopeMean = SlopeMean[1]; // second = negative
 
-		// ³ª´©¾îÁø º¤ÅÍµéÀÇ ÁÂÇ¥ Áß¾Ó°ª ±¸ÇÏ±â
+		// ë‚˜ëˆ„ì–´ì§„ ë²¡í„°ë“¤ì˜ ì¢Œí‘œ ì¤‘ì•™ê°’ êµ¬í•˜ê¸°
 		vector<double> InterceptPos = get_intercept_coord(image, slopePositiveLines, slopeNegativeLines);
 		double xInterceptPosMean = InterceptPos[0]; // first = positive
 		double xInterceptNegMean = InterceptPos[1]; // second = negative
 
-		// µ¿¿µ»ó ÀúÀå½Ã drawing_lane return void¿¡¼­ MatÀ¸·Î
+		// ë™ì˜ìƒ ì €ì¥ì‹œ drawing_lane return voidì—ì„œ Matìœ¼ë¡œ
 		Mat final;
 		final = drawing_lane(image, posSlopeMean, xInterceptPosMean, negSlopeMean, xInterceptNegMean);
 		outputvideo << final;
