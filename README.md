@@ -12,4 +12,7 @@
 1. filtering color
 차선의 색깔이 희미해지거나 주변색과 유사해질 경우 다음과 같이 차선을 인식하지 못하게 된다.
 
+<img src = "https://github.com/junhyukch7/Lane-Detection/blob/main/test%20image/test1_filtered_bad.PNG" width="40%">
+
+
 
